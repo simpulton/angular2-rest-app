@@ -1,67 +1,106 @@
-import {items, selectedItem} from './items';
-
 import {
   it,
   describe,
-  expect
-} from 'angular2/testing';
+  expect,
+  inject,
+  beforeEachProviders,
+  beforeEach} from 'angular2/testing';
+import { provide } from 'angular2/core';
+import { HTTP_PROVIDERS, Http, XHRBackend, Response, ResponseOptions } from 'angular2/http';
+import { ItemsService } from './items';
+import {MockBackend, MockConnection} from 'angular2/http/testing';
 
-describe('Items', () => {
-  describe('`selectedItem` store', () => {
-    it('returns null by default', () => {
-      let defaultState = selectedItem(undefined, {type: 'random', payload: {}});
+describe('ItemsService', () => {
+  let service, backend, http, setConnection;
 
-      expect(defaultState).toBeNull();
-    });
+  beforeEachProviders(() => [
+    ItemsService, HTTP_PROVIDERS, provide(XHRBackend, {useClass: MockBackend})
+  ]);
 
-    it('`SELECT_ITEM` returns the provided payload', () => {
-      let selectItem = selectedItem(undefined, {type: 'SELECT_ITEM', payload: 'payload'});
+  beforeEach(inject([ItemsService, XHRBackend, Http], (ItemsService, mockBackend, Http) => {
+    service = ItemsService;
+    backend = mockBackend;
+    http = Http;
 
-      expect(selectItem).toBe('payload');
-    });
+    setConnection = (options): void => {
+      let responseOptions = { body: options};
+
+      backend.connections.subscribe((connection: MockConnection) => {
+        connection.mockRespond(
+          new Response(
+            new ResponseOptions(responseOptions)
+          )
+        );
+      });
+    };
+  }));
+
+  it('#loadItems', () => {
+    let requestBody = {id: 1, name: 'First Item'};
+
+    setConnection(requestBody);
+    spyOn(http, 'get').and.callThrough();
+
+    service.loadItems()
+      .then((res) => {
+        expect(http.get).toHaveBeenCalled();
+        expect(res).toEqual(requestBody);
+      });
   });
 
-  describe('`items` store', () => {
-    let initialState = [
-      { id: 0, name: 'First Item' },
-      { id: 1, name: 'Second Item' }
-    ];
+  it('#saveItem', () => {
+    let newItem = { id: undefined, name: 'New Item', description: 'Description' },
+        existingItem = { id: 1, name: 'Existing Item', description: 'Description' };
 
-    it('returns an empty array by default', () => {
-      let defaultState = items(undefined, {type: 'random', payload: {}});
+    spyOn(service, 'createItem').and.callThrough();
+    spyOn(service, 'updateItem');
 
-      expect(defaultState).toEqual([]);
-    });
+    service.saveItem(newItem);
 
-    it('`ADD_ITEMS`', () => {
-      let payload = initialState,
-          stateItems = items([], {type: 'ADD_ITEMS', payload: payload});
+    expect(service.createItem).toHaveBeenCalled();
+    expect(service.updateItem).not.toHaveBeenCalled();
 
-      expect(stateItems).toEqual(payload);
-    });
+    service.saveItem(existingItem);
 
-    it('`CREATE_ITEM`', () => {
-      let payload = {id: 2, name: 'added item'},
-          result = [...initialState, payload],
-          stateItems = items(initialState, {type: 'CREATE_ITEM', payload: payload});
+    expect(service.createItem.calls.count()).toEqual(1);
+    expect(service.updateItem).toHaveBeenCalled();
+  });
 
-      expect(stateItems).toEqual(result);
-    });
+  it('#createItem', () => {
+    let requestBody = { id: 1, name: 'First Item', description: 'Described' };
 
-    it('`UPDATE_ITEM`', () => {
-      let payload = { id: 1, name: 'Updated Item' },
-          result = [ initialState[0], { id: 1, name: 'Updated Item' } ],
-          stateItems = items(initialState, {type: 'UPDATE_ITEM', payload: payload});
+    setConnection(requestBody);
+    spyOn(http, 'post').and.callThrough();
 
-      expect(stateItems).toEqual(result);
-    });
+    service.createItem(requestBody)
+      .then((res) => {
+        expect(http.post.calls.argsFor(0).length).toBe(3);
+        expect(res).toEqual(requestBody);
+      });
+  });
 
-    it('`DELETE_ITEM`', () => {
-      let payload = { id: 0 },
-          result = [ initialState[1] ],
-          stateItems = items(initialState, {type: 'DELETE_ITEM', payload: payload});
+  it('#updateItem', () => {
+    let requestBody = { id: 1, name: 'First Item Updated', description: 'Described' };
 
-      expect(stateItems).toEqual(result);
-    });
+    setConnection(requestBody);
+    spyOn(http, 'put').and.callThrough();
+
+    service.updateItem(requestBody)
+      .then((res) => {
+        expect(http.put.calls.argsFor(0).length).toBe(3);
+        expect(res).toEqual(requestBody);
+      });
+  });
+
+  it('#deleteItem', () => {
+    setConnection(undefined);
+    spyOn(http, 'delete').and.callThrough();
+
+    let deletedItem = { id: 1, name: 'First Item Updated', description: 'Described' };
+    service.deleteItem(deletedItem)
+      .then((res) => {
+        expect(http.delete.calls.argsFor(0).length).toBe(1);
+        expect(res).toBeUndefined();
+      });
   });
 });
