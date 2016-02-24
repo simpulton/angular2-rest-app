@@ -1,7 +1,5 @@
 import {Component, Input, Output, EventEmitter, ChangeDetectionStrategy} from 'angular2/core';
-import {ItemsService, Item, AppStore} from './items';
-import {Observable} from 'rxjs/Observable';
-import {Store} from '@ngrx/store';
+import {ItemsService, Item} from './items';
 
 //-------------------------------------------------------------------
 // ITEMS-LIST
@@ -87,53 +85,73 @@ class ItemDetail {
 //-------------------------------------------------------------------
 @Component({
   selector: 'my-app',
-  providers: [],
+  providers: [ItemsService],
   template: `
   <div class="mdl-cell mdl-cell--6-col">
-    <items-list [items]="items | async"
+    <items-list [items]="items"
       (selected)="selectItem($event)" (deleted)="deleteItem($event)">
     </items-list>
   </div>
   <div class="mdl-cell mdl-cell--6-col">
     <item-detail
       (saved)="saveItem($event)" (cancelled)="resetItem($event)"
-      [item]="selectedItem | async">Select an Item</item-detail>
+      [item]="selectedItem">Select an Item</item-detail>
   </div>
   `,
-  directives: [ItemList, ItemDetail],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  directives: [ItemList, ItemDetail]
 })
 export class App {
-  items: Observable<Array<Item>>;
-  selectedItem: Observable<Item>;
+  items: Array<Item>;
+  selectedItem: Item;
 
-  constructor(private itemsService: ItemsService, private store: Store<AppStore>) {
-    this.items = itemsService.items;
-    this.selectedItem = store.select('selectedItem');
-    this.selectedItem.subscribe(v => console.log(v));
+  constructor(private itemsService: ItemsService) {}
 
-    itemsService.loadItems();
+  ngOnInit() {
+    this.itemsService.loadItems()
+      .then(items => {
+        this.items = items;
+      });
   }
 
   resetItem() {
     let emptyItem: Item = {id: null, name: '', description: ''};
-    this.store.dispatch({type: 'SELECT_ITEM', payload: emptyItem});
+    this.selectedItem = emptyItem;
   }
 
   selectItem(item: Item) {
-    this.store.dispatch({type: 'SELECT_ITEM', payload: item});
+    this.selectedItem = item;
   }
 
   saveItem(item: Item) {
-    this.itemsService.saveItem(item);
+    this.itemsService.saveItem(item)
+      .then(responseItem => {
+        if (item.id) {
+          this.replaceItem(responseItem);
+        } else {
+          this.pushItem(responseItem);
+        }
+      });
 
     // Generally, we would want to wait for the result of `itemsService.saveItem`
     // before resetting the current item.
     this.resetItem();
   }
 
+  replaceItem(item: Item) {
+    this.items = this.items.map(mapItem => {
+      return mapItem.id === item.id ? item : mapItem;
+    });
+  }
+
+  pushItem(item: Item) {
+    this.items.push(item);
+  }
+
   deleteItem(item: Item) {
-    this.itemsService.deleteItem(item);
+    this.itemsService.deleteItem(item)
+      .then(() => {
+        this.items.splice(this.items.indexOf(item), 1);
+      });
 
     // Generally, we would want to wait for the result of `itemsService.deleteItem`
     // before resetting the current item.
