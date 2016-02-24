@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "ES5",
+    "module": "commonjs",
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "sourceMap": true
+  },
+  "exclude": [
+    "node_modules"
+  ],
+  "filesGlob": [
+    "client/**/*.ts"
+  ],
+  "compileOnSave": false,
+  "atom": {
+    "rewriteTsconfig": true
+  },
+  "files": [
+    "client/bootstrap.ts",
+    "client/src/app.ts",
+    "client/src/items.spec.ts",
+    "client/src/items.ts",
+    "client/vendor.ts"
+  ]
+}
