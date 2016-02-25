@@ -1,16 +1,16 @@
-## Reactive RESTful Angular 2 application with ngrx store
+## RESTful Angular 2 application
 
-A RESTful master-detail application built using Angular 2 and [ngrx store](https://github.com/ngrx/store).
+A RESTful master-detail application built using Angular 2.
 
 ### Getting Started
 
-There are two main parts to this application. The first is the server which we are using `json-server` to simulate a REST api. The second part is the Angular 2 application which we will use `webpack-dev-server` to display.  
+There are two main parts to this application. The first is the server, for which we are using `json-server` to simulate a REST api. The second part is the Angular 2 application which we will use `webpack-dev-server` to display.  
 
 To get started run the commands below.
 
 ```
-$ git clone https://github.com/simpulton/ngrx-rest-app.git
-$ cd ngrx-rest-app
+$ git clone https://github.com/simpulton/angular2-rest-app.git
+$ cd angular2-rest-app
 $ npm install
 $ npm start
 ```
