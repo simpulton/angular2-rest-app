@@ -1,8 +1,8 @@
 {
   "name": "ng2-rest-website",
   "version": "0.0.1",
-  "description": "Simple REST website in Angular 2 and NGRX",
-  "repository": "https://github.com/simpulton/ngrx-rest-app",
+  "description": "Simple REST app in Angular 2",
+  "repository": "https://github.com/simpulton/angular2-rest-app",
   "scripts": {
     "clean": "rimraf node_modules doc typings && npm cache clean",
     "clean-install": "npm run clean && npm install",
