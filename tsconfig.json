@@ -8,9 +8,12 @@
     "sourceMap": true
   },
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "typings/main.d.ts",
+    "typings/main"
   ],
   "filesGlob": [
+    "typings/browser.d.ts",
     "client/**/*.ts"
   ],
   "compileOnSave": false,
@@ -18,6 +21,7 @@
     "rewriteTsconfig": true
   },
   "files": [
+    "typings/browser.d.ts",
     "client/bootstrap.ts",
     "client/src/app.ts",
     "client/src/items.spec.ts",

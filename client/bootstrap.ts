@@ -1,7 +1,7 @@
 //main entry point
-import {bootstrap} from 'angular2/platform/browser';
+import {bootstrap} from '@angular/platform-browser-dynamic';
 import {App} from './src/app';
-import {HTTP_PROVIDERS} from 'angular2/http';
+import {HTTP_PROVIDERS} from '@angular/http';
 
 bootstrap(App, [
   HTTP_PROVIDERS

@@ -1,4 +1,4 @@
-import {Component, Input, Output, EventEmitter, ChangeDetectionStrategy} from 'angular2/core';
+import {Component, Input, Output, EventEmitter, ChangeDetectionStrategy} from '@angular/core';
 import {ItemsService, Item} from './items';
 
 //-------------------------------------------------------------------
@@ -7,7 +7,7 @@ import {ItemsService, Item} from './items';
 @Component({
   selector: 'items-list',
   template: `
-  <div *ngFor="#item of items" (click)="selected.emit(item)"
+  <div *ngFor="let item of items" (click)="selected.emit(item)"
     class="item-card mdl-card mdl-shadow--2dp">
     <div class="mdl-card__title">
       <h2 class="mdl-card__title-text">{{item.name}}</h2>
